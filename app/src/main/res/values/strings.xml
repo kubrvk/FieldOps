@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FieldOps Mobile Audit</string>
+    <string name="scan_barcode">Barkod / QR Tara</string>
+    <string name="sync_status">Senkronizasyon Durumu</string>
+</resources>
