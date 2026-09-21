@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr" data-theme="light">
 <head>
   <meta charset="UTF-8">
@@ -716,7 +716,7 @@
 
   <!-- Fullscreen Login Portal (Industrial Dispatcher Terminal) -->
   <div class="login-overlay" id="loginPortal">
-    <script>if (localStorage.getItem('fo_logged_in') === 'true') document.getElementById('loginPortal').style.display = 'none';</script>
+    <script>if (localStorage.getItem('fo_logged_in') === 'true' || location.search.includes('demo=1')) document.getElementById('loginPortal').style.display = 'none';</script>
     <div class="login-box">
       <!-- Top High-Visibility Hazard Stripe -->
       <div class="fo-hazard-strip"></div>
@@ -1777,7 +1777,7 @@
 
     // Init with TR default
     applyLanguage(currentLang);
-    if (localStorage.getItem('fo_logged_in') === 'true') {
+    if (localStorage.getItem('fo_logged_in') === 'true' || location.search.includes('demo=1')) {
       const p = document.getElementById('loginPortal');
       if (p) p.style.display = 'none';
     }
