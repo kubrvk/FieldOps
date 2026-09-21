@@ -221,29 +221,145 @@
       gap: 0.5rem;
     }
 
-    .orders-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-      gap: 1.25rem;
+    /* Split Dispatcher Console Layout */
+    .telemetry-ribbon {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      box-shadow: var(--shadow-sm);
     }
-    @media (max-width: 640px) { .orders-grid { grid-template-columns: 1fr; } }
+    .telemetry-chips {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .telemetry-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+    }
+    .telemetry-label { color: var(--text-muted); font-weight: 500; }
+    .telemetry-val { font-weight: 700; font-family: var(--font-mono); }
+
+    .console-layout {
+      display: grid;
+      grid-template-columns: 440px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    @media (max-width: 1080px) {
+      .console-layout { grid-template-columns: 1fr; }
+    }
+
+    .search-box {
+      position: relative;
+      width: 100%;
+    }
+    .search-box i {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 0.5rem 0.75rem 0.5rem 2.2rem;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      background: #f8fafc;
+      outline: none;
+      font-family: inherit;
+    }
+    .search-box input:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.15);
+    }
+
+    .filter-chip {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.25rem 0.65rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .filter-chip:hover, .filter-chip.active {
+      background: #fef3c7;
+      color: #92400e;
+      border-color: #fcd34d;
+    }
+
+    .console-orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      max-height: calc(100vh - 270px);
+      overflow-y: auto;
+      padding-right: 0.35rem;
+    }
 
     .order-card {
       background: #fff;
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 1.25rem;
+      padding: 1.15rem;
       box-shadow: var(--shadow-sm);
       transition: all 0.2s;
       display: flex;
       flex-direction: column;
-      gap: 0.6rem;
+      gap: 0.5rem;
+      cursor: pointer;
+      position: relative;
     }
     .order-card:hover {
-      border-color: #fcd34d;
+      border-color: #f59e0b;
       box-shadow: var(--shadow-md);
       transform: translateY(-2px);
     }
+    .order-card.selected {
+      border-color: var(--primary);
+      background: #fffdf7;
+      box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25);
+    }
+
+    .btn-icon-danger {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #94a3b8;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.15s;
+    }
+    .btn-icon-danger:hover {
+      color: var(--danger);
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+
     .order-top {
       display: flex;
       justify-content: space-between;
@@ -667,218 +783,235 @@
     </div>
   </header>
 
-  <!-- Web Navigation Tabs -->
-  <div class="nav-tabs-bar">
-    <button class="tab-btn active" onclick="switchTab('orders', this)" id="navTab1">
-      <i class="bi bi-list-task"></i> İş Emirleri &amp; Saha Görevleri
-    </button>
-    <button class="tab-btn" onclick="switchTab('audit', this)" id="navTab2">
-      <i class="bi bi-clipboard-check"></i> Saha Denetim &amp; Kontrol Stüdyosu
-    </button>
-    <button class="tab-btn" onclick="switchTab('sync', this)" id="navTab3">
-      <i class="bi bi-database-check"></i> SQLite Çevrimdışı Kuyruk &amp; Senkronizasyon
-    </button>
+  <!-- Industrial Telemetry Ribbon -->
+  <div class="telemetry-ribbon">
+    <div class="telemetry-chips">
+      <div class="telemetry-chip">
+        <i class="bi bi-broadcast text-primary"></i>
+        <span class="telemetry-label" id="kpiTitle1">Aktif Saha Görevleri:</span>
+        <span class="telemetry-val text-primary" id="kpiActive">8</span>
+      </div>
+      <div class="telemetry-chip">
+        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+        <span class="telemetry-label" id="kpiTitleCrit">Kritik Acil:</span>
+        <span class="telemetry-val text-danger" id="kpiCrit">2</span>
+      </div>
+      <div class="telemetry-chip">
+        <i class="bi bi-check-circle-fill text-accent"></i>
+        <span class="telemetry-label" id="kpiTitle2">Tamamlanan Denetimler:</span>
+        <span class="telemetry-val text-accent" id="kpiCompleted">19</span>
+      </div>
+      <div class="telemetry-chip">
+        <i class="bi bi-database text-muted"></i>
+        <span class="telemetry-label" id="kpiTitle3">SQLite Kuyruğu:</span>
+        <span class="telemetry-val" id="kpiQueue">0</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center;">
+      <button class="btn btn-outline btn-sm" onclick="switchView('console', this)" id="btnViewConsole" style="background:#fffbeb;border-color:#fcd34d;color:#92400e;font-weight:700;">
+        <i class="bi bi-layout-split"></i> <span id="lblViewConsole">Saha Sevk Konsolu (Split)</span>
+      </button>
+      <button class="btn btn-outline btn-sm" onclick="switchView('sync', this)" id="btnViewSync">
+        <i class="bi bi-database-check"></i> <span id="lblViewSync">SQLite Senkronizasyon</span>
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="openNewOrderModal()" id="btnNewOrder">
+        <i class="bi bi-plus-lg"></i> <span id="lblBtnNewOrder">Yeni İş Emri</span>
+      </button>
+    </div>
   </div>
 
-  <main>
-    <!-- KPI Summary Row -->
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <div>
-          <div class="kpi-title" id="kpiTitle1">Aktif Saha Görevleri</div>
-          <div class="kpi-val" id="kpiActive">8</div>
-        </div>
-        <i class="bi bi-tools kpi-icon text-primary"></i>
-      </div>
-      <div class="kpi-card">
-        <div>
-          <div class="kpi-title" id="kpiTitle2">Tamamlanan Denetimler</div>
-          <div class="kpi-val" style="color:var(--accent);" id="kpiCompleted">19</div>
-        </div>
-        <i class="bi bi-check-circle kpi-icon text-accent"></i>
-      </div>
-      <div class="kpi-card">
-        <div>
-          <div class="kpi-title" id="kpiTitle3">Bekleyen SQLite Kuyruğu</div>
-          <div class="kpi-val" style="color:var(--primary);" id="kpiQueue">0</div>
-        </div>
-        <i class="bi bi-cloud-arrow-up kpi-icon"></i>
-      </div>
-      <div class="kpi-card">
-        <div>
-          <div class="kpi-title" id="kpiTitle4">GPS Doğruluk Oranı</div>
-          <div class="kpi-val" style="color:#0284c7;">100%</div>
-        </div>
-        <i class="bi bi-crosshair kpi-icon"></i>
-      </div>
-    </div>
-
-    <!-- TAB 1: Work Orders Dashboard -->
-    <div id="tab-orders" class="tab-pane">
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title" id="secTitle1"><i class="bi bi-briefcase text-primary"></i> Saha İş Emri Dağıtım Listesi</h2>
-            <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.2rem;" id="secDesc1">Müşteri talepleri ve planlı endüstriyel bakım kayıtları.</div>
-          </div>
-          <div style="display:flex;gap:0.5rem;">
-            <button class="btn btn-outline btn-sm" onclick="filterOrders('all')" id="fltAll">Tümü</button>
-            <button class="btn btn-outline btn-sm" onclick="filterOrders('Critical')" id="fltCrit">Kritik</button>
-            <button class="btn btn-outline btn-sm" onclick="filterOrders('In Progress')" id="fltProg">Devam Eden</button>
-          </div>
-        </div>
-
-        <div class="orders-grid" id="ordersContainer">
-          <!-- Rendered via JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 2: Site Inspection Studio -->
-    <div id="tab-audit" class="tab-pane" style="display:none;">
-      <div class="studio-grid">
+  <main style="max-width:1600px;margin:1.25rem auto;padding:0 1.5rem;width:100%;flex:1;">
+    <!-- VIEW 1: Split-Screen Console -->
+    <div id="view-console" class="view-pane">
+      <div class="console-layout">
         
-        <!-- Left Panel -->
-        <div>
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><i class="bi bi-info-circle text-primary"></i> <span id="lblJobInfo">Görev &amp; Konum Bilgisi</span></h3>
-              <span class="badge badge-high" id="activeJobBadge">WO-8421</span>
-            </div>
-
-            <div style="margin-bottom:1rem;">
-              <strong id="activeJobTitle" style="font-size:1rem;display:block;margin-bottom:0.25rem;">Ana Jeneratör 1,500 kVA Yıllık Revizyon</strong>
-              <div style="font-size:0.82rem;color:var(--text-muted);" id="activeJobSite"><i class="bi bi-geo-alt"></i> Sektör 4 Veri Merkezi Güç Santrali</div>
-              <div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.2rem;" id="activeJobEquip"><i class="bi bi-cpu"></i> Ekipman: CAT-3516B (Seri No: 92841)</div>
-            </div>
-
-            <!-- GPS Box -->
-            <div class="gps-box">
+        <!-- Left Column: Work Orders Dispatcher List -->
+        <div class="console-left">
+          <div class="card" style="padding:1.15rem;margin-bottom:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
               <div>
-                <div style="font-weight:700;color:#92400e;display:flex;align-items:center;gap:0.35rem;font-size:0.82rem;">
-                  <i class="bi bi-crosshair"></i> <span id="lblGpsTitle">Canlı GPS Geotag Doğrulaması</span>
-                </div>
-                <div style="font-family:var(--font-mono);font-size:0.8rem;color:#78350f;margin-top:0.2rem;" id="gpsCoordinates">
-                  41.0082° N, 28.9784° E &bull; Hassasiyet &plusmn;2.8m
-                </div>
+                <h3 style="font-size:1.05rem;font-weight:800;color:var(--text);display:flex;align-items:center;gap:0.4rem;margin:0;">
+                  <i class="bi bi-card-list text-primary"></i> <span id="secTitle1">Saha Sevk Listesi</span>
+                </h3>
+                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;" id="secDesc1">Sevk bekleyen ve devam eden iş emirleri</div>
               </div>
-              <button class="btn btn-outline btn-sm" style="background:#fff;border-color:#fcd34d;" onclick="acquireGps()">
-                <i class="bi bi-arrow-repeat"></i> <span id="btnGpsFix">Konum Al</span>
-              </button>
+              <span class="badge badge-high" id="orderCountBadge">8 Görev</span>
             </div>
 
-            <!-- Evidence Attachment -->
-            <div style="margin-bottom:1.25rem;">
-              <label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:0.4rem;" id="lblPhotoEvidence">Saha Fotoğraf Kanıtı (GPS Damgalı)</label>
-              <div style="display:flex;gap:0.5rem;align-items:center;">
-                <button class="btn btn-outline btn-sm" onclick="attachPhoto()">
-                  <i class="bi bi-camera-fill"></i> <span id="btnAddPhoto">Fotoğraf Ekle</span>
-                </button>
-                <span id="photoStatus" style="font-size:0.78rem;color:var(--accent);">
-                  <i class="bi bi-check-circle-fill"></i> flans_sizdirmazlik_kanit.jpg
-                </span>
+            <!-- Search & Filters -->
+            <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.85rem;">
+              <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="orderSearchInput" oninput="handleOrderSearch(this.value)" placeholder="İş emri no, başlık veya ekipman ara...">
+              </div>
+              <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+                <button class="filter-chip active" onclick="filterOrders('all', this)" id="fltAll">Tümü</button>
+                <button class="filter-chip" onclick="filterOrders('Critical', this)" id="fltCrit">Kritik</button>
+                <button class="filter-chip" onclick="filterOrders('In Progress', this)" id="fltProg">İşlemde</button>
+                <button class="filter-chip" onclick="filterOrders('Done', this)" id="fltDone">Tamamlandı</button>
               </div>
             </div>
 
-            <!-- Digital Signature -->
-            <div>
-              <div style="display:flex;justify-content:space-between;align-items:center;">
-                <label style="font-weight:600;font-size:0.82rem;" id="lblSignOff">Yetkili Dijital Onay İmzası</label>
-                <button class="btn btn-outline btn-sm" style="padding:0.15rem 0.4rem;font-size:0.75rem;" onclick="clearSignature()" id="btnClearSign">Temizle</button>
-              </div>
-              <div class="signature-pad signed" id="signPad" onclick="signPadClick()">
-                <i class="bi bi-pen-fill" style="margin-right:0.35rem;"></i> Saha Sorumlusu Onayı Doğrulandı
-              </div>
+            <!-- Scrollable list of orders -->
+            <div class="console-orders-list" id="ordersContainer">
+              <!-- Rendered via JS -->
             </div>
           </div>
         </div>
 
-        <!-- Right Panel -->
-        <div>
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title"><i class="bi bi-card-checklist text-primary"></i> <span id="lblChecklistTitle">Teknik Saha Kontrol Kriterleri</span></h3>
-              <span style="font-size:0.8rem;color:var(--text-muted);" id="lblStandard">ISO-9001 Endüstriyel Standartlar</span>
-            </div>
-
-            <div id="checklistContainer">
-              <div class="checklist-item">
+        <!-- Right Column: Interactive Inspection Studio -->
+        <div class="console-right">
+          <div class="card" style="padding:0;overflow:hidden;margin-bottom:0;">
+            <!-- Header of active job -->
+            <div style="background:#fffbeb;border-bottom:1px solid #fde68a;padding:1rem 1.35rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+              <div style="display:flex;align-items:center;gap:0.75rem;">
+                <span class="badge badge-critical" id="activeJobBadge" style="font-size:0.85rem;padding:0.35rem 0.75rem;">WO-8421</span>
                 <div>
-                  <div style="font-weight:700;font-size:0.92rem;" id="chk1Title">1. Acil Durum Durdurma &amp; Güvenlik Kilidi</div>
-                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk1Desc">Acil stop butonu devresi ve yardımcı kontak tepki testi.</div>
-                </div>
-                <div class="check-btn-group">
-                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
-                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                  <h3 id="activeJobTitle" style="font-size:1.1rem;font-weight:800;color:#0f172a;margin:0;">Ana Jeneratör 1,500 kVA Yıllık Revizyon</h3>
+                  <div style="font-size:0.82rem;color:#78350f;margin-top:2px;" id="activeJobSite"><i class="bi bi-geo-alt-fill"></i> Sektör 4 Veri Merkezi Güç Santrali</div>
                 </div>
               </div>
-
-              <div class="checklist-item">
-                <div>
-                  <div style="font-weight:700;font-size:0.92rem;" id="chk2Title">2. Hidrolik Hat Basıncı &amp; Flanş Sızdırmazlığı</div>
-                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk2Desc">Nominal 210 Bar &plusmn; 5 Bar basınç tutarlılığı, yağ sızıntısı kontrolü.</div>
-                </div>
-                <div class="check-btn-group">
-                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
-                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
-                </div>
-              </div>
-
-              <div class="checklist-item">
-                <div>
-                  <div style="font-weight:700;font-size:0.92rem;" id="chk3Title">3. 380V Üç Faz Gerilim &amp; Faz Dengesi</div>
-                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk3Desc">Fazlar arası voltaj sapmasının %1.5 altında olduğunun doğrulanması.</div>
-                </div>
-                <div class="check-btn-group">
-                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
-                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
-                </div>
-              </div>
-
-              <div class="checklist-item">
-                <div>
-                  <div style="font-weight:700;font-size:0.92rem;" id="chk4Title">4. Hava Emiş Filtresi &amp; Radyatör Temizliği</div>
-                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk4Desc">Partikül tıkanıklığı, hava debisi ve delta-P fark basınç testi.</div>
-                </div>
-                <div class="check-btn-group">
-                  <button class="check-btn pass" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
-                  <button class="check-btn fail active" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
-                </div>
-              </div>
-
-              <div class="checklist-item">
-                <div>
-                  <div style="font-weight:700;font-size:0.92rem;" id="chk5Title">5. Motor Yatakları &amp; Rulman Titreşim Spektrumu</div>
-                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk5Desc">RMS titreşim ivmesi &lt; 2.8 mm/s ve ultrasonik yağlama analizi.</div>
-                </div>
-                <div class="check-btn-group">
-                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
-                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
-                </div>
-              </div>
-
-              <div class="checklist-item">
-                <div>
-                  <div style="font-weight:700;font-size:0.92rem;" id="chk6Title">6. Topraklama Direnci &amp; Eşpotansiyel Kuşaklama</div>
-                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk6Desc">Megger test cihazı ile ölçülen geçiş direnci &lt; 2.0 Ohm.</div>
-                </div>
-                <div class="check-btn-group">
-                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
-                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
-                </div>
+              <div style="display:flex;gap:0.5rem;align-items:center;">
+                <button class="btn btn-accent btn-sm" onclick="completeInspection()" id="btnSaveInspect" style="font-weight:700;">
+                  <i class="bi bi-check2-all"></i> <span id="lblBtnSaveInspect">Denetimi Tamamla</span>
+                </button>
+                <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:#fca5a5;" onclick="promptDeleteCurrentOrder()" id="btnDeleteCurrentJob" title="Bu iş emrini sil">
+                  <i class="bi bi-trash3"></i> <span id="lblBtnDeleteCurrent">İş Emrini Sil</span>
+                </button>
               </div>
             </div>
 
-            <div style="margin-top:1.25rem;">
-              <label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:0.35rem;" id="lblTechNotes">Teknik Notlar &amp; Müşteri Açıklaması</label>
-              <textarea class="form-control" rows="2" style="width:100%;padding:0.6rem;border:1px solid var(--border-strong);border-radius:6px;font-family:inherit;font-size:0.85rem;" id="techNotesArea">Radyatör hava giriş filtresinde partikül birikimi tespit edildi. Değişim talebi sisteme iletildi.</textarea>
-            </div>
+            <div style="padding:1.25rem;">
+              <!-- Equipment and GPS telemetry -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+                <div class="gps-box" style="margin-bottom:0;">
+                  <div>
+                    <div style="font-weight:700;color:#92400e;display:flex;align-items:center;gap:0.35rem;font-size:0.82rem;">
+                      <i class="bi bi-crosshair"></i> <span id="lblGpsTitle">Canlı GPS Geotag Doğrulaması</span>
+                    </div>
+                    <div style="font-family:var(--font-mono);font-size:0.8rem;color:#78350f;margin-top:0.2rem;" id="gpsCoordinates">
+                      41.0082° N, 28.9784° E &bull; Hassasiyet &plusmn;2.1m
+                    </div>
+                  </div>
+                  <button class="btn btn-outline btn-sm" style="background:#fff;border-color:#fcd34d;" onclick="acquireGps()">
+                    <i class="bi bi-arrow-repeat"></i> <span id="btnGpsFix">Konum Al</span>
+                  </button>
+                </div>
 
-            <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
-              <button class="btn btn-outline" onclick="switchTab('orders', document.querySelectorAll('.tab-btn')[0])" id="btnCancel">Vazgeç</button>
-              <button class="btn btn-accent" style="font-weight:700;" onclick="completeInspection()" id="btnSaveInspect">
-                <i class="bi bi-check2-all"></i> Denetimi Tamamla &amp; Kaydet
-              </button>
+                <div style="background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:0.75rem 1rem;display:flex;flex-direction:column;justify-content:center;">
+                  <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;" id="lblEquipHeader">Atanmış Endüstriyel Ekipman</span>
+                  <strong style="font-size:0.95rem;color:#0f172a;margin-top:0.2rem;" id="activeJobEquip"><i class="bi bi-cpu"></i> CAT-3516B (Seri No: 92841)</strong>
+                </div>
+              </div>
+
+              <!-- ISO-9001 Checklist -->
+              <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:0.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+                  <h4 style="font-size:0.95rem;font-weight:700;display:flex;align-items:center;gap:0.4rem;color:#0f172a;">
+                    <i class="bi bi-card-checklist text-primary"></i> <span id="lblChecklistTitle">ISO-9001 Saha Muayene Kontrol Kriterleri</span>
+                  </h4>
+                  <span style="font-size:0.8rem;color:var(--text-muted);background:#f1f5f9;padding:0.25rem 0.65rem;border-radius:999px;font-weight:600;" id="lblStandard">ISO-9001 Endüstriyel Standartlar</span>
+                </div>
+
+                <div id="checklistContainer">
+                  <div class="checklist-item">
+                    <div>
+                      <div style="font-weight:700;font-size:0.9rem;" id="chk1Title">1. Acil Durum Durdurma &amp; Güvenlik Kilidi</div>
+                      <div style="font-size:0.78rem;color:var(--text-muted);" id="chk1Desc">Acil stop butonu devresi ve yardımcı kontak tepki testi.</div>
+                    </div>
+                    <div class="check-btn-group">
+                      <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                      <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                    </div>
+                  </div>
+
+                  <div class="checklist-item">
+                    <div>
+                      <div style="font-weight:700;font-size:0.9rem;" id="chk2Title">2. Hidrolik Hat Basıncı &amp; Flanş Sızdırmazlığı</div>
+                      <div style="font-size:0.78rem;color:var(--text-muted);" id="chk2Desc">Nominal 210 Bar &plusmn; 5 Bar basınç tutarlılığı, yağ sızıntısı kontrolü.</div>
+                    </div>
+                    <div class="check-btn-group">
+                      <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                      <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                    </div>
+                  </div>
+
+                  <div class="checklist-item">
+                    <div>
+                      <div style="font-weight:700;font-size:0.9rem;" id="chk3Title">3. 380V Üç Faz Gerilim &amp; Faz Dengesi</div>
+                      <div style="font-size:0.78rem;color:var(--text-muted);" id="chk3Desc">Fazlar arası voltaj sapmasının %1.5 altında olduğunun doğrulanması.</div>
+                    </div>
+                    <div class="check-btn-group">
+                      <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                      <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                    </div>
+                  </div>
+
+                  <div class="checklist-item">
+                    <div>
+                      <div style="font-weight:700;font-size:0.9rem;" id="chk4Title">4. Hava Emiş Filtresi &amp; Radyatör Temizliği</div>
+                      <div style="font-size:0.78rem;color:var(--text-muted);" id="chk4Desc">Partikül tıkanıklığı, hava debisi ve delta-P fark basınç testi.</div>
+                    </div>
+                    <div class="check-btn-group">
+                      <button class="check-btn pass" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                      <button class="check-btn fail active" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                    </div>
+                  </div>
+
+                  <div class="checklist-item">
+                    <div>
+                      <div style="font-weight:700;font-size:0.9rem;" id="chk5Title">5. Motor Yatakları &amp; Rulman Titreşim Spektrumu</div>
+                      <div style="font-size:0.78rem;color:var(--text-muted);" id="chk5Desc">RMS titreşim ivmesi &lt; 2.8 mm/s ve ultrasonik yağlama analizi.</div>
+                    </div>
+                    <div class="check-btn-group">
+                      <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                      <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                    </div>
+                  </div>
+
+                  <div class="checklist-item">
+                    <div>
+                      <div style="font-weight:700;font-size:0.9rem;" id="chk6Title">6. Topraklama Direnci &amp; Eşpotansiyel Kuşaklama</div>
+                      <div style="font-size:0.78rem;color:var(--text-muted);" id="chk6Desc">Megger test cihazı ile ölçülen geçiş direnci &lt; 2.0 Ohm.</div>
+                    </div>
+                    <div class="check-btn-group">
+                      <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                      <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Photo + Signature Row -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem;">
+                <div>
+                  <label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:0.4rem;" id="lblPhotoEvidence">Saha Fotoğraf Kanıtı (GPS Damgalı)</label>
+                  <div style="display:flex;gap:0.5rem;align-items:center;">
+                    <button class="btn btn-outline btn-sm" onclick="attachPhoto()">
+                      <i class="bi bi-camera-fill"></i> <span id="btnAddPhoto">Fotoğraf Ekle</span>
+                    </button>
+                    <span id="photoStatus" style="font-size:0.78rem;color:var(--accent);">
+                      <i class="bi bi-check-circle-fill"></i> flans_sizdirmazlik_kanit.jpg
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <label style="font-weight:600;font-size:0.82rem;" id="lblSignOff">Yetkili Dijital Onay İmzası</label>
+                    <button class="btn btn-outline btn-sm" style="padding:0.15rem 0.4rem;font-size:0.75rem;" onclick="clearSignature()" id="btnClearSign">Temizle</button>
+                  </div>
+                  <div class="signature-pad signed" id="signPad" onclick="signPadClick()" style="height:55px;margin-top:0.35rem;font-size:0.9rem;">
+                    <i class="bi bi-pen-fill" style="margin-right:0.35rem;"></i> <span id="lblSignPadText">Saha Sorumlusu Onayı Doğrulandı</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notes -->
+              <div style="margin-top:1rem;">
+                <label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:0.35rem;" id="lblTechNotes">Teknik Notlar &amp; Müşteri Açıklaması</label>
+                <textarea class="form-control" rows="2" style="width:100%;padding:0.6rem;border:1px solid var(--border-strong);border-radius:6px;font-family:inherit;font-size:0.85rem;" id="techNotesArea">Radyatör hava giriş filtresinde partikül birikimi tespit edildi. Değişim talebi sisteme iletildi.</textarea>
+              </div>
             </div>
           </div>
         </div>
@@ -886,8 +1019,8 @@
       </div>
     </div>
 
-    <!-- TAB 3: Room SQLite Sync -->
-    <div id="tab-sync" class="tab-pane" style="display:none;">
+    <!-- VIEW 2: Room SQLite Sync -->
+    <div id="view-sync" class="view-pane" style="display:none;">
       <div class="card">
         <div class="card-header">
           <div>
@@ -927,6 +1060,74 @@
       </div>
     </div>
   </main>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteConfirmModal">
+    <div class="modal-card" style="max-width:440px;">
+      <div class="modal-header" style="background:#fef2f2;border-bottom:1px solid #fecaca;">
+        <h3 style="font-size:1.05rem;font-weight:700;color:var(--danger);display:flex;align-items:center;gap:0.5rem;">
+          <i class="bi bi-trash3-fill"></i> <span id="lblDelModalTitle">İş Emrini Sil</span>
+        </h3>
+        <button style="border:none;background:none;font-size:1.2rem;cursor:pointer;color:#94a3b8;" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.9rem;color:#334155;margin-bottom:0.5rem;" id="lblDelModalPrompt">
+          Bu saha iş emrini kalıcı olarak silmek istediğinize emin misiniz?
+        </p>
+        <div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:8px;padding:0.75rem;font-family:var(--font-mono);font-size:0.85rem;color:#0f172a;" id="deleteTargetInfo">
+          WO-8421
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeDeleteModal()" id="btnCancelDelete">Vazgeç</button>
+        <button type="button" class="btn btn-sm" style="background:var(--danger);color:#fff;" onclick="executeDeleteOrder()" id="btnConfirmDelete">
+          <i class="bi bi-trash3"></i> <span id="lblBtnConfirmDelete">Evet, Sil</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Work Order Modal -->
+  <div class="modal-backdrop" id="newOrderModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size:1.05rem;font-weight:700;"><i class="bi bi-plus-circle text-primary"></i> <span id="lblNewOrderTitle">Yeni Saha İş Emri Oluştur</span></h3>
+        <button style="border:none;background:none;font-size:1.2rem;cursor:pointer;" onclick="closeNewOrderModal()">&times;</button>
+      </div>
+      <form onsubmit="handleCreateOrder(event)">
+        <div class="modal-body" style="display:flex;flex-direction:column;gap:0.85rem;">
+          <div>
+            <label style="font-size:0.82rem;font-weight:600;display:block;margin-bottom:0.3rem;" id="lblInpOrderTitle">Görev Başlığı</label>
+            <input type="text" id="newOrderTitle" class="form-control" style="width:100%;padding:0.55rem;border:1px solid var(--border-strong);border-radius:6px;" required placeholder="Örn: Trafo Yağ Analizi &amp; Nem Kontrolü">
+          </div>
+          <div>
+            <label style="font-size:0.82rem;font-weight:600;display:block;margin-bottom:0.3rem;" id="lblInpOrderLocation">Konum / Tesis</label>
+            <input type="text" id="newOrderLocation" class="form-control" style="width:100%;padding:0.55rem;border:1px solid var(--border-strong);border-radius:6px;" required placeholder="Örn: Organize Sanayi Bölgesi 3. Cadde No: 12">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+            <div>
+              <label style="font-size:0.82rem;font-weight:600;display:block;margin-bottom:0.3rem;" id="lblInpOrderEquip">Ekipman Kodu</label>
+              <input type="text" id="newOrderEquip" class="form-control" style="width:100%;padding:0.55rem;border:1px solid var(--border-strong);border-radius:6px;" required placeholder="Örn: SIEMENS SGT-400">
+            </div>
+            <div>
+              <label style="font-size:0.82rem;font-weight:600;display:block;margin-bottom:0.3rem;" id="lblInpOrderPrio">Öncelik Seviyesi</label>
+              <select id="newOrderPrio" style="width:100%;padding:0.55rem;border:1px solid var(--border-strong);border-radius:6px;background:#fff;">
+                <option value="Critical">Kritik (Acil Müdahale)</option>
+                <option value="High" selected>Yüksek Öncelik</option>
+                <option value="Normal">Normal Planlı</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeNewOrderModal()" id="btnCancelNewOrder">Vazgeç</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btnSubmitNewOrder">
+            <i class="bi bi-check-lg"></i> <span id="lblBtnSubmitNewOrder">İş Emrini Kaydet</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- User / Customer Profile Switch Modal -->
   <div class="modal-backdrop" id="authModal">
@@ -1160,6 +1361,11 @@
       applyLanguage(currentLang);
     }
 
+    let selectedJobId = workOrders.length > 0 ? workOrders[0].id : null;
+    let pendingDeleteId = null;
+    let currentFilter = 'all';
+    let searchQuery = '';
+
     function applyLanguage(lang) {
       document.documentElement.lang = lang;
       document.getElementById('langTr').className = (lang === 'tr') ? 'active' : '';
@@ -1167,33 +1373,47 @@
 
       if (lang === 'tr') {
         document.getElementById('hdrSub').textContent = 'Saha Operasyonları & Denetim Platformu';
-        document.getElementById('navTab1').innerHTML = '<i class="bi bi-list-task"></i> İş Emirleri & Saha Görevleri';
-        document.getElementById('navTab2').innerHTML = '<i class="bi bi-clipboard-check"></i> Saha Denetim & Kontrol Stüdyosu';
-        document.getElementById('navTab3').innerHTML = '<i class="bi bi-database-check"></i> SQLite Çevrimdışı Kuyruk & Senkronizasyon';
-        document.getElementById('kpiTitle1').textContent = 'Aktif Saha Görevleri';
-        document.getElementById('kpiTitle2').textContent = 'Tamamlanan Denetimler';
-        document.getElementById('kpiTitle3').textContent = 'Bekleyen SQLite Kuyruğu';
-        document.getElementById('kpiTitle4').textContent = 'GPS Doğruluk Oranı';
-        document.getElementById('secTitle1').innerHTML = '<i class="bi bi-briefcase text-primary"></i> Saha İş Emri Dağıtım Listesi';
-        document.getElementById('secDesc1').textContent = 'Müşteri talepleri ve planlı endüstriyel bakım kayıtları.';
+        document.getElementById('kpiTitle1').textContent = 'Aktif Saha Görevleri:';
+        document.getElementById('kpiTitleCrit').textContent = 'Kritik Acil:';
+        document.getElementById('kpiTitle2').textContent = 'Tamamlanan Denetimler:';
+        document.getElementById('kpiTitle3').textContent = 'SQLite Kuyruğu:';
+        document.getElementById('lblViewConsole').textContent = 'Saha Sevk Konsolu (Split)';
+        document.getElementById('lblViewSync').textContent = 'SQLite Senkronizasyon';
+        document.getElementById('lblBtnNewOrder').textContent = 'Yeni İş Emri';
+        document.getElementById('secTitle1').textContent = 'Saha Sevk Listesi';
+        document.getElementById('secDesc1').textContent = 'Sevk bekleyen ve devam eden iş emirleri';
+        document.getElementById('orderSearchInput').placeholder = 'İş emri no, başlık veya ekipman ara...';
         document.getElementById('fltAll').textContent = 'Tümü';
         document.getElementById('fltCrit').textContent = 'Kritik';
-        document.getElementById('fltProg').textContent = 'Devam Eden';
-        document.getElementById('btnSwitchRole').textContent = 'Rol Değiştir';
-        document.getElementById('lblJobInfo').textContent = 'Görev & Konum Bilgisi';
+        document.getElementById('fltProg').textContent = 'İşlemde';
+        document.getElementById('fltDone').textContent = 'Tamamlandı';
+        document.getElementById('lblBtnSaveInspect').textContent = 'Denetimi Tamamla';
+        document.getElementById('lblBtnDeleteCurrent').textContent = 'İş Emrini Sil';
         document.getElementById('lblGpsTitle').textContent = 'Canlı GPS Geotag Doğrulaması';
         document.getElementById('btnGpsFix').textContent = 'Konum Al';
+        document.getElementById('lblEquipHeader').textContent = 'Atanmış Endüstriyel Ekipman';
+        document.getElementById('lblChecklistTitle').textContent = 'ISO-9001 Saha Muayene Kontrol Kriterleri';
+        document.getElementById('lblStandard').textContent = 'ISO-9001 Endüstriyel Standartlar';
+        document.querySelectorAll('.lblPass').forEach(el => el.textContent = 'Uygun');
+        document.querySelectorAll('.lblFail').forEach(el => el.textContent = 'Uygunsuz');
         document.getElementById('lblPhotoEvidence').textContent = 'Saha Fotoğraf Kanıtı (GPS Damgalı)';
         document.getElementById('btnAddPhoto').textContent = 'Fotoğraf Ekle';
         document.getElementById('lblSignOff').textContent = 'Yetkili Dijital Onay İmzası';
         document.getElementById('btnClearSign').textContent = 'Temizle';
-        document.getElementById('lblChecklistTitle').textContent = 'Teknik Saha Kontrol Kriterleri';
-        document.getElementById('lblStandard').textContent = 'ISO-9001 Endüstriyel Standartlar';
-        document.querySelectorAll('.lblPass').forEach(el => el.textContent = 'Uygun');
-        document.querySelectorAll('.lblFail').forEach(el => el.textContent = 'Uygunsuz');
+        document.getElementById('lblSignPadText').textContent = `${currentRole} Onayı Doğrulandı`;
         document.getElementById('lblTechNotes').textContent = 'Teknik Notlar & Müşteri Açıklaması';
-        document.getElementById('btnCancel').textContent = 'Vazgeç';
-        document.getElementById('btnSaveInspect').innerHTML = '<i class="bi bi-check2-all"></i> Denetimi Tamamla & Kaydet';
+        document.getElementById('lblDelModalTitle').textContent = 'İş Emrini Sil';
+        document.getElementById('lblDelModalPrompt').textContent = 'Bu saha iş emrini kalıcı olarak silmek istediğinize emin misiniz?';
+        document.getElementById('btnCancelDelete').textContent = 'Vazgeç';
+        document.getElementById('lblBtnConfirmDelete').textContent = 'Evet, Sil';
+        document.getElementById('lblNewOrderTitle').textContent = 'Yeni Saha İş Emri Oluştur';
+        document.getElementById('lblInpOrderTitle').textContent = 'Görev Başlığı';
+        document.getElementById('lblInpOrderLocation').textContent = 'Konum / Tesis';
+        document.getElementById('lblInpOrderEquip').textContent = 'Ekipman Kodu';
+        document.getElementById('lblInpOrderPrio').textContent = 'Öncelik Seviyesi';
+        document.getElementById('btnCancelNewOrder').textContent = 'Vazgeç';
+        document.getElementById('lblBtnSubmitNewOrder').textContent = 'İş Emrini Kaydet';
+        document.getElementById('btnSwitchRole').textContent = 'Rol Değiştir';
         document.getElementById('syncSecTitle').innerHTML = '<i class="bi bi-database text-primary"></i> Room SQLite Çevrimdışı Depolama & Senkronizasyon';
         document.getElementById('syncSecDesc').textContent = 'Saha teknisyenleri şebeke çekmediğinde işlemler yerel SQLite veritabanına yazılır, internet geldiğinde WorkManager ile buluta aktarılır.';
         document.getElementById('btnTriggerSync').innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> WorkManager Senkronizasyonunu Tetikle';
@@ -1218,33 +1438,47 @@
         if (document.getElementById('loginLangEn')) document.getElementById('loginLangEn').className = '';
       } else {
         document.getElementById('hdrSub').textContent = 'Enterprise Field Service & Site Operations';
-        document.getElementById('navTab1').innerHTML = '<i class="bi bi-list-task"></i> Work Orders & Dispatch';
-        document.getElementById('navTab2').innerHTML = '<i class="bi bi-clipboard-check"></i> Site Inspection & Audit Studio';
-        document.getElementById('navTab3').innerHTML = '<i class="bi bi-database-check"></i> SQLite Offline Queue & Cloud Sync';
-        document.getElementById('kpiTitle1').textContent = 'Active Field Orders';
-        document.getElementById('kpiTitle2').textContent = 'Completed Audits';
-        document.getElementById('kpiTitle3').textContent = 'Pending SQLite Queue';
-        document.getElementById('kpiTitle4').textContent = 'GPS Accuracy Ratio';
-        document.getElementById('secTitle1').innerHTML = '<i class="bi bi-briefcase text-primary"></i> Dispatched Work Orders List';
-        document.getElementById('secDesc1').textContent = 'Customer service requests and scheduled preventive maintenance records.';
+        document.getElementById('kpiTitle1').textContent = 'Active Field Orders:';
+        document.getElementById('kpiTitleCrit').textContent = 'Critical Urgent:';
+        document.getElementById('kpiTitle2').textContent = 'Completed Audits:';
+        document.getElementById('kpiTitle3').textContent = 'SQLite Queue:';
+        document.getElementById('lblViewConsole').textContent = 'Field Dispatch Console (Split)';
+        document.getElementById('lblViewSync').textContent = 'SQLite Synchronization';
+        document.getElementById('lblBtnNewOrder').textContent = 'New Work Order';
+        document.getElementById('secTitle1').textContent = 'Field Dispatch List';
+        document.getElementById('secDesc1').textContent = 'Pending and in-progress field maintenance orders';
+        document.getElementById('orderSearchInput').placeholder = 'Search by ID, title, or equipment...';
         document.getElementById('fltAll').textContent = 'All';
         document.getElementById('fltCrit').textContent = 'Critical';
         document.getElementById('fltProg').textContent = 'In Progress';
-        document.getElementById('btnSwitchRole').textContent = 'Switch Role';
-        document.getElementById('lblJobInfo').textContent = 'Job & Site Particulars';
+        document.getElementById('fltDone').textContent = 'Completed';
+        document.getElementById('lblBtnSaveInspect').textContent = 'Complete Audit';
+        document.getElementById('lblBtnDeleteCurrent').textContent = 'Delete Order';
         document.getElementById('lblGpsTitle').textContent = 'Live GPS Geotag Verification';
         document.getElementById('btnGpsFix').textContent = 'Re-Fix GPS';
+        document.getElementById('lblEquipHeader').textContent = 'Assigned Industrial Asset';
+        document.getElementById('lblChecklistTitle').textContent = 'ISO-9001 Field Inspection Checklist';
+        document.getElementById('lblStandard').textContent = 'ISO-9001 Industrial Standards';
+        document.querySelectorAll('.lblPass').forEach(el => el.textContent = 'Pass');
+        document.querySelectorAll('.lblFail').forEach(el => el.textContent = 'Fail');
         document.getElementById('lblPhotoEvidence').textContent = 'Site Photo Evidence (GPS Watermark)';
         document.getElementById('btnAddPhoto').textContent = 'Attach Photo';
         document.getElementById('lblSignOff').textContent = 'Authorized Digital Sign-Off';
         document.getElementById('btnClearSign').textContent = 'Clear';
-        document.getElementById('lblChecklistTitle').textContent = 'Technical Inspection Checklist';
-        document.getElementById('lblStandard').textContent = 'ISO-9001 Industrial Standards';
-        document.querySelectorAll('.lblPass').forEach(el => el.textContent = 'Pass');
-        document.querySelectorAll('.lblFail').forEach(el => el.textContent = 'Fail');
+        document.getElementById('lblSignPadText').textContent = `${currentRole} Verification Confirmed`;
         document.getElementById('lblTechNotes').textContent = 'Technical Observations & Client Notes';
-        document.getElementById('btnCancel').textContent = 'Cancel';
-        document.getElementById('btnSaveInspect').innerHTML = '<i class="bi bi-check2-all"></i> Finalize & Commit Audit';
+        document.getElementById('lblDelModalTitle').textContent = 'Delete Work Order';
+        document.getElementById('lblDelModalPrompt').textContent = 'Are you sure you want to permanently delete this field work order?';
+        document.getElementById('btnCancelDelete').textContent = 'Cancel';
+        document.getElementById('lblBtnConfirmDelete').textContent = 'Yes, Delete';
+        document.getElementById('lblNewOrderTitle').textContent = 'Create New Field Work Order';
+        document.getElementById('lblInpOrderTitle').textContent = 'Work Order Title';
+        document.getElementById('lblInpOrderLocation').textContent = 'Site / Facility Location';
+        document.getElementById('lblInpOrderEquip').textContent = 'Equipment Code';
+        document.getElementById('lblInpOrderPrio').textContent = 'Priority Tier';
+        document.getElementById('btnCancelNewOrder').textContent = 'Cancel';
+        document.getElementById('lblBtnSubmitNewOrder').textContent = 'Save Work Order';
+        document.getElementById('btnSwitchRole').textContent = 'Switch Role';
         document.getElementById('syncSecTitle').innerHTML = '<i class="bi bi-database text-primary"></i> Room SQLite Offline Storage & Synchronization';
         document.getElementById('syncSecDesc').textContent = 'Offline mutations are committed locally to Room SQLite entities before dispatch via Android WorkManager.';
         document.getElementById('btnTriggerSync').innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Trigger WorkManager Cloud Sync';
@@ -1273,33 +1507,69 @@
       saveState();
     }
 
-    function renderOrders(filter = 'all') {
+    function renderOrders() {
       const container = document.getElementById('ordersContainer');
       container.innerHTML = '';
 
       const filtered = workOrders.filter(w => {
-        if (filter === 'all') return true;
-        if (filter === 'Critical') return w.prioKey === 'Critical';
-        if (filter === 'In Progress') return w.statusTr === 'İşlemde';
+        if (currentFilter === 'Critical' && w.prioKey !== 'Critical') return false;
+        if (currentFilter === 'In Progress' && w.statusTr !== 'İşlemde') return false;
+        if (currentFilter === 'Done' && w.statusTr !== 'Tamamlandı') return false;
+
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          const matchTitle = (w.titleTr || '').toLowerCase().includes(q) || (w.titleEn || '').toLowerCase().includes(q);
+          const matchId = (w.id || '').toLowerCase().includes(q);
+          const matchEquip = (w.equip || '').toLowerCase().includes(q);
+          const matchLoc = (w.locationTr || '').toLowerCase().includes(q) || (w.locationEn || '').toLowerCase().includes(q);
+          if (!matchTitle && !matchId && !matchEquip && !matchLoc) return false;
+        }
         return true;
       });
+
+      const activeCount = workOrders.filter(w => w.statusTr !== 'Tamamlandı').length;
+      const critCount = workOrders.filter(w => w.prioKey === 'Critical').length;
+      const doneCount = workOrders.filter(w => w.statusTr === 'Tamamlandı').length;
+      
+      document.getElementById('kpiActive').textContent = activeCount;
+      document.getElementById('kpiCrit').textContent = critCount;
+      document.getElementById('kpiCompleted').textContent = doneCount;
+      document.getElementById('orderCountBadge').textContent = `${filtered.length} ${currentLang === 'tr' ? 'Görev' : 'Orders'}`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align:center;padding:2.5rem 1rem;color:var(--text-muted);font-size:0.88rem;"><i class="bi bi-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.4;"></i>${currentLang === 'tr' ? 'Kriterlere uygun iş emri bulunamadı.' : 'No matching work orders found.'}</div>`;
+        return;
+      }
+
+      if (!workOrders.some(w => w.id === selectedJobId) && workOrders.length > 0) {
+        selectedJobId = workOrders[0].id;
+      }
+      if (selectedJobId) {
+        loadJobDetails(selectedJobId);
+      }
 
       filtered.forEach(wo => {
         const title = currentLang === 'tr' ? wo.titleTr : wo.titleEn;
         const location = currentLang === 'tr' ? wo.locationTr : wo.locationEn;
         const prio = currentLang === 'tr' ? wo.prioTr : wo.prioEn;
         const due = currentLang === 'tr' ? wo.dueTr : wo.dueEn;
-        const btnText = currentLang === 'tr' ? 'Denetimi Aç' : 'Inspect Job';
+        const isSelected = wo.id === selectedJobId;
 
         const div = document.createElement('div');
-        div.className = 'order-card';
+        div.className = `order-card ${isSelected ? 'selected' : ''}`;
+        div.onclick = () => selectJob(wo.id);
         div.innerHTML = `
           <div class="order-top">
             <div>
               <span class="order-id">${wo.id}</span>
               <div class="order-title">${title}</div>
             </div>
-            <span class="badge ${wo.badge}">${prio}</span>
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <span class="badge ${wo.badge}">${prio}</span>
+              <button class="btn-icon-danger" onclick="promptDeleteOrder('${wo.id}', event)" title="${currentLang === 'tr' ? 'İş Emrini Sil' : 'Delete Work Order'}">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
           </div>
           <div class="order-meta">
             <i class="bi bi-geo-alt"></i> ${location}
@@ -1309,31 +1579,13 @@
           </div>
           <div class="order-footer">
             <span style="font-size:0.8rem;color:var(--text-muted);"><i class="bi bi-clock"></i> ${due}</span>
-            <button class="btn btn-primary btn-sm" onclick="selectJob('${wo.id}')">
-              <i class="bi bi-clipboard-check"></i> ${btnText}
-            </button>
+            <span style="font-size:0.8rem;color:var(--primary);font-weight:600;">
+              ${isSelected ? (currentLang === 'tr' ? '● İnceleniyor' : '● Inspecting') : (currentLang === 'tr' ? 'İncele &bull;' : 'Inspect &bull;')}
+            </span>
           </div>
         `;
         container.appendChild(div);
       });
-    }
-
-    function filterOrders(type) {
-      renderOrders(type);
-      showToast(currentLang === 'tr' ? `Filtrelendi: ${type}` : `Filtered: ${type}`);
-    }
-
-    function selectJob(id) {
-      const job = workOrders.find(j => j.id === id);
-      if (!job) return;
-
-      document.getElementById('activeJobBadge').textContent = job.id;
-      document.getElementById('activeJobTitle').textContent = currentLang === 'tr' ? job.titleTr : job.titleEn;
-      document.getElementById('activeJobSite').innerHTML = `<i class="bi bi-geo-alt"></i> ${currentLang === 'tr' ? job.locationTr : job.locationEn}`;
-      document.getElementById('activeJobEquip').innerHTML = `<i class="bi bi-cpu"></i> ${job.equip}`;
-
-      switchTab('audit', document.querySelectorAll('.tab-btn')[1]);
-      showToast(currentLang === 'tr' ? `İş Emri Yüklendi: ${id}` : `Loaded Work Order: ${id}`);
     }
 
     function acquireGps() {
