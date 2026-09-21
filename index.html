@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FieldOps — Saha Operasyonları &amp; Denetim Platformu</title>
+  <meta name="description" content="FieldOps: Saha iş emri dağıtımı, GPS konum doğrulamalı denetim kontrol listeleri ve Room SQLite çevrimdışı senkronizasyon platformu.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2a10 10 0 0 0-10 10c0 7 10 18 10 18s10-11 10-18A10 10 0 0 0 16 2zm0 14a4 4 0 1 1 0-8 4 4 0 0 1 0 8z' fill='%23d97706'/%3E%3Cpath d='M14 11h4M16 9v4' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --primary: #d97706;
+      --primary-hover: #b45309;
+      --primary-subtle: #fef3c7;
+      --navy: #0f172a;
+      --accent: #059669;
+      --accent-subtle: #ecfdf5;
+      --danger: #dc2626;
+      --danger-subtle: #fee2e2;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      font-size: 14.5px;
+      line-height: 1.5;
+    }
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-md);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      color: #fff;
+      text-decoration: none;
+      letter-spacing: -0.3px;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .network-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .network-pill:hover { background: rgba(255, 255, 255, 0.18); }
+    .network-pill.offline { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.12);
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .user-pill:hover { background: rgba(255, 255, 255, 0.2); }
+
+    /* Lang Toggle */
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 6px;
+      padding: 0.25rem 0.55rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #cbd5e1;
+      user-select: none;
+    }
+    .lang-toggle span.active { color: #fcd34d; }
+
+    .nav-tabs-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      gap: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .tab-btn {
+      padding: 0.9rem 0.25rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .kpi-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kpi-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 0.2rem;
+    }
+    .kpi-icon { font-size: 2.2rem; opacity: 0.2; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .orders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+      gap: 1.25rem;
+    }
+    @media (max-width: 640px) { .orders-grid { grid-template-columns: 1fr; } }
+
+    .order-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .order-card:hover {
+      border-color: #fcd34d;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .order-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .order-id {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+    .order-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .order-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .order-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-critical { background: var(--danger-subtle); color: var(--danger); border: 1px solid #fecaca; }
+    .badge-high { background: var(--primary-subtle); color: var(--primary); border: 1px solid #fde68a; }
+    .badge-normal { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    .badge-done { background: var(--accent-subtle); color: var(--accent); border: 1px solid #a7f3d0; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-navy { background: var(--navy); color: #fff; }
+    .btn-navy:hover { background: #1e293b; }
+    .btn-outline { background: #fff; border-color: var(--border-strong); color: var(--text); }
+    .btn-outline:hover { background: #f8fafc; border-color: #94a3b8; }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #047857; }
+    .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.8rem; }
+
+    .studio-grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 960px) { .studio-grid { grid-template-columns: 1fr; } }
+
+    .checklist-item {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .check-btn-group { display: flex; gap: 0.4rem; }
+    .check-btn {
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-strong);
+      background: #fff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s;
+    }
+    .check-btn.pass.active { background: #10b981; color: #fff; border-color: #10b981; }
+    .check-btn.fail.active { background: #ef4444; color: #fff; border-color: #ef4444; }
+
+    .gps-box {
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .signature-pad {
+      border: 2px dashed var(--border-strong);
+      border-radius: 8px;
+      height: 110px;
+      background: #fafafa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      user-select: none;
+      margin-top: 0.5rem;
+    }
+    .signature-pad.signed {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #059669;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal-card {
+      background: #fff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc;
+    }
+    .modal-body { padding: 1.5rem; }
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      background: #f8fafc;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    /* Exact User-Specified Footer */
+    footer {
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto;
+    }
+    footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    footer a:hover { text-decoration: underline; }
+
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #0f172a;
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 2000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- Enterprise Web App Header -->
+  <header>
+    <a href="index.html" class="brand">
+      <div class="brand-icon"><i class="bi bi-geo-alt-fill"></i></div>
+      <div>
+        <span>FieldOps</span>
+        <span style="font-size:0.75rem;font-weight:500;opacity:0.85;display:block;margin-top:-3px;" id="hdrSub">Saha Operasyonları &amp; Denetim Platformu</span>
+      </div>
+    </a>
+
+    <div class="header-center">
+      <div class="network-pill" id="networkToggle" onclick="toggleNetworkMode()">
+        <i class="bi bi-wifi"></i>
+        <span id="networkText">Online (WorkManager Cloud Sync)</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="lang-toggle" onclick="toggleLanguage()">
+        <span id="langTr" class="active">TR</span>
+        <span style="opacity:0.4;">|</span>
+        <span id="langEn">EN</span>
+      </div>
+
+      <div class="user-pill" onclick="openAuthModal()">
+        <i class="bi bi-person-badge-fill" style="color:var(--primary);font-size:1.1rem;"></i>
+        <div>
+          <strong id="techRole">Saha Sorumlusu</strong>
+          <span style="opacity:0.75;font-size:0.75rem;margin-left:0.25rem;" id="techSub">(Operatör ID #409)</span>
+        </div>
+      </div>
+      <button class="btn btn-navy btn-sm" style="border:1px solid rgba(255,255,255,0.2);" onclick="openAuthModal()">
+        <i class="bi bi-box-arrow-in-right"></i> <span id="btnSwitchRole">Rol Değiştir</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Web Navigation Tabs -->
+  <div class="nav-tabs-bar">
+    <button class="tab-btn active" onclick="switchTab('orders', this)" id="navTab1">
+      <i class="bi bi-list-task"></i> İş Emirleri &amp; Saha Görevleri
+    </button>
+    <button class="tab-btn" onclick="switchTab('audit', this)" id="navTab2">
+      <i class="bi bi-clipboard-check"></i> Saha Denetim &amp; Kontrol Stüdyosu
+    </button>
+    <button class="tab-btn" onclick="switchTab('sync', this)" id="navTab3">
+      <i class="bi bi-database-check"></i> SQLite Çevrimdışı Kuyruk &amp; Senkronizasyon
+    </button>
+  </div>
+
+  <main>
+    <!-- KPI Summary Row -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-title" id="kpiTitle1">Aktif Saha Görevleri</div>
+          <div class="kpi-val" id="kpiActive">8</div>
+        </div>
+        <i class="bi bi-tools kpi-icon text-primary"></i>
+      </div>
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-title" id="kpiTitle2">Tamamlanan Denetimler</div>
+          <div class="kpi-val" style="color:var(--accent);" id="kpiCompleted">19</div>
+        </div>
+        <i class="bi bi-check-circle kpi-icon text-accent"></i>
+      </div>
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-title" id="kpiTitle3">Bekleyen SQLite Kuyruğu</div>
+          <div class="kpi-val" style="color:var(--primary);" id="kpiQueue">0</div>
+        </div>
+        <i class="bi bi-cloud-arrow-up kpi-icon"></i>
+      </div>
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-title" id="kpiTitle4">GPS Doğruluk Oranı</div>
+          <div class="kpi-val" style="color:#0284c7;">100%</div>
+        </div>
+        <i class="bi bi-crosshair kpi-icon"></i>
+      </div>
+    </div>
+
+    <!-- TAB 1: Work Orders Dashboard -->
+    <div id="tab-orders" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title" id="secTitle1"><i class="bi bi-briefcase text-primary"></i> Saha İş Emri Dağıtım Listesi</h2>
+            <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.2rem;" id="secDesc1">Müşteri talepleri ve planlı endüstriyel bakım kayıtları.</div>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button class="btn btn-outline btn-sm" onclick="filterOrders('all')" id="fltAll">Tümü</button>
+            <button class="btn btn-outline btn-sm" onclick="filterOrders('Critical')" id="fltCrit">Kritik</button>
+            <button class="btn btn-outline btn-sm" onclick="filterOrders('In Progress')" id="fltProg">Devam Eden</button>
+          </div>
+        </div>
+
+        <div class="orders-grid" id="ordersContainer">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Site Inspection Studio -->
+    <div id="tab-audit" class="tab-pane" style="display:none;">
+      <div class="studio-grid">
+        
+        <!-- Left Panel -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="bi bi-info-circle text-primary"></i> <span id="lblJobInfo">Görev &amp; Konum Bilgisi</span></h3>
+              <span class="badge badge-high" id="activeJobBadge">WO-8421</span>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+              <strong id="activeJobTitle" style="font-size:1rem;display:block;margin-bottom:0.25rem;">Ana Jeneratör 1,500 kVA Yıllık Revizyon</strong>
+              <div style="font-size:0.82rem;color:var(--text-muted);" id="activeJobSite"><i class="bi bi-geo-alt"></i> Sektör 4 Veri Merkezi Güç Santrali</div>
+              <div style="font-size:0.82rem;color:var(--text-muted);margin-top:0.2rem;" id="activeJobEquip"><i class="bi bi-cpu"></i> Ekipman: CAT-3516B (Seri No: 92841)</div>
+            </div>
+
+            <!-- GPS Box -->
+            <div class="gps-box">
+              <div>
+                <div style="font-weight:700;color:#92400e;display:flex;align-items:center;gap:0.35rem;font-size:0.82rem;">
+                  <i class="bi bi-crosshair"></i> <span id="lblGpsTitle">Canlı GPS Geotag Doğrulaması</span>
+                </div>
+                <div style="font-family:var(--font-mono);font-size:0.8rem;color:#78350f;margin-top:0.2rem;" id="gpsCoordinates">
+                  41.0082° N, 28.9784° E &bull; Hassasiyet &plusmn;2.8m
+                </div>
+              </div>
+              <button class="btn btn-outline btn-sm" style="background:#fff;border-color:#fcd34d;" onclick="acquireGps()">
+                <i class="bi bi-arrow-repeat"></i> <span id="btnGpsFix">Konum Al</span>
+              </button>
+            </div>
+
+            <!-- Evidence Attachment -->
+            <div style="margin-bottom:1.25rem;">
+              <label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:0.4rem;" id="lblPhotoEvidence">Saha Fotoğraf Kanıtı (GPS Damgalı)</label>
+              <div style="display:flex;gap:0.5rem;align-items:center;">
+                <button class="btn btn-outline btn-sm" onclick="attachPhoto()">
+                  <i class="bi bi-camera-fill"></i> <span id="btnAddPhoto">Fotoğraf Ekle</span>
+                </button>
+                <span id="photoStatus" style="font-size:0.78rem;color:var(--accent);">
+                  <i class="bi bi-check-circle-fill"></i> flans_sizdirmazlik_kanit.jpg
+                </span>
+              </div>
+            </div>
+
+            <!-- Digital Signature -->
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <label style="font-weight:600;font-size:0.82rem;" id="lblSignOff">Yetkili Dijital Onay İmzası</label>
+                <button class="btn btn-outline btn-sm" style="padding:0.15rem 0.4rem;font-size:0.75rem;" onclick="clearSignature()" id="btnClearSign">Temizle</button>
+              </div>
+              <div class="signature-pad signed" id="signPad" onclick="signPadClick()">
+                <i class="bi bi-pen-fill" style="margin-right:0.35rem;"></i> Saha Sorumlusu Onayı Doğrulandı
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="bi bi-card-checklist text-primary"></i> <span id="lblChecklistTitle">Teknik Saha Kontrol Kriterleri</span></h3>
+              <span style="font-size:0.8rem;color:var(--text-muted);" id="lblStandard">ISO-9001 Endüstriyel Standartlar</span>
+            </div>
+
+            <div id="checklistContainer">
+              <div class="checklist-item">
+                <div>
+                  <div style="font-weight:700;font-size:0.92rem;" id="chk1Title">1. Acil Durum Durdurma &amp; Güvenlik Kilidi</div>
+                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk1Desc">Acil stop butonu devresi ve yardımcı kontak tepki testi.</div>
+                </div>
+                <div class="check-btn-group">
+                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                </div>
+              </div>
+
+              <div class="checklist-item">
+                <div>
+                  <div style="font-weight:700;font-size:0.92rem;" id="chk2Title">2. Hidrolik Hat Basıncı &amp; Flanş Sızdırmazlığı</div>
+                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk2Desc">Nominal 210 Bar &plusmn; 5 Bar basınç tutarlılığı, yağ sızıntısı kontrolü.</div>
+                </div>
+                <div class="check-btn-group">
+                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                </div>
+              </div>
+
+              <div class="checklist-item">
+                <div>
+                  <div style="font-weight:700;font-size:0.92rem;" id="chk3Title">3. 380V Üç Faz Gerilim &amp; Faz Dengesi</div>
+                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk3Desc">Fazlar arası voltaj sapmasının %1.5 altında olduğunun doğrulanması.</div>
+                </div>
+                <div class="check-btn-group">
+                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                </div>
+              </div>
+
+              <div class="checklist-item">
+                <div>
+                  <div style="font-weight:700;font-size:0.92rem;" id="chk4Title">4. Hava Emiş Filtresi &amp; Radyatör Temizliği</div>
+                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk4Desc">Partikül tıkanıklığı, hava debisi ve delta-P fark basınç testi.</div>
+                </div>
+                <div class="check-btn-group">
+                  <button class="check-btn pass" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                  <button class="check-btn fail active" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                </div>
+              </div>
+
+              <div class="checklist-item">
+                <div>
+                  <div style="font-weight:700;font-size:0.92rem;" id="chk5Title">5. Motor Yatakları &amp; Rulman Titreşim Spektrumu</div>
+                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk5Desc">RMS titreşim ivmesi &lt; 2.8 mm/s ve ultrasonik yağlama analizi.</div>
+                </div>
+                <div class="check-btn-group">
+                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                </div>
+              </div>
+
+              <div class="checklist-item">
+                <div>
+                  <div style="font-weight:700;font-size:0.92rem;" id="chk6Title">6. Topraklama Direnci &amp; Eşpotansiyel Kuşaklama</div>
+                  <div style="font-size:0.8rem;color:var(--text-muted);" id="chk6Desc">Megger test cihazı ile ölçülen geçiş direnci &lt; 2.0 Ohm.</div>
+                </div>
+                <div class="check-btn-group">
+                  <button class="check-btn pass active" onclick="toggleCheck(this, 'pass')"><i class="bi bi-check-lg"></i> <span class="lblPass">Uygun</span></button>
+                  <button class="check-btn fail" onclick="toggleCheck(this, 'fail')"><i class="bi bi-x-lg"></i> <span class="lblFail">Uygunsuz</span></button>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:1.25rem;">
+              <label style="font-weight:600;font-size:0.82rem;display:block;margin-bottom:0.35rem;" id="lblTechNotes">Teknik Notlar &amp; Müşteri Açıklaması</label>
+              <textarea class="form-control" rows="2" style="width:100%;padding:0.6rem;border:1px solid var(--border-strong);border-radius:6px;font-family:inherit;font-size:0.85rem;" id="techNotesArea">Radyatör hava giriş filtresinde partikül birikimi tespit edildi. Değişim talebi sisteme iletildi.</textarea>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
+              <button class="btn btn-outline" onclick="switchTab('orders', document.querySelectorAll('.tab-btn')[0])" id="btnCancel">Vazgeç</button>
+              <button class="btn btn-accent" style="font-weight:700;" onclick="completeInspection()" id="btnSaveInspect">
+                <i class="bi bi-check2-all"></i> Denetimi Tamamla &amp; Kaydet
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 3: Room SQLite Sync -->
+    <div id="tab-sync" class="tab-pane" style="display:none;">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title" id="syncSecTitle"><i class="bi bi-database text-primary"></i> Room SQLite Çevrimdışı Depolama &amp; Senkronizasyon</h2>
+            <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.2rem;" id="syncSecDesc">Saha teknisyenleri şebeke çekmediğinde işlemler yerel SQLite veritabanına yazılır, internet geldiğinde WorkManager ile buluta aktarılır.</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="triggerSync()" id="btnTriggerSync">
+            <i class="bi bi-cloud-arrow-up-fill"></i> WorkManager Senkronizasyonunu Tetikle
+          </button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;">
+          <div style="background:#f8fafc;padding:1.25rem;border-radius:8px;border:1px solid var(--border);">
+            <strong style="display:block;margin-bottom:0.5rem;" id="lblDbArch">Yerel Veritabanı Mimarisi</strong>
+            <div style="font-size:0.85rem;display:flex;flex-direction:column;gap:0.4rem;">
+              <div><strong>Veritabanı Motoru:</strong> Android Room 2.6 / SQLite 3.42</div>
+              <div><strong>Entity Modelleri:</strong> WorkOrderEntity, InspectionLogEntity, GeotagPoint</div>
+              <div><strong>Kuyruk Durumu:</strong> <span id="queueCount" style="color:var(--primary);font-weight:700;">0 bekleyen işlem</span></div>
+            </div>
+          </div>
+          <div style="background:#f8fafc;padding:1.25rem;border-radius:8px;border:1px solid var(--border);">
+            <strong style="display:block;margin-bottom:0.5rem;" id="lblPolicy">WorkManager Arka Plan Politikası</strong>
+            <div style="font-size:0.85rem;display:flex;flex-direction:column;gap:0.4rem;">
+              <div><strong>Worker Türü:</strong> CoroutineWorker &bull; Expedited</div>
+              <div><strong>Ağ Kısıtı:</strong> Constraints(RequiredNetworkType.CONNECTED)</div>
+              <div><strong>Yeniden Deneme:</strong> Exponential Backoff (30s, 60s, 120s)</div>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;" id="lblConsole">Canlı Worker Konsol Günlüğü</h3>
+        <div id="syncLog" style="background:#0f172a;color:#38bdf8;font-family:var(--font-mono);font-size:0.8rem;padding:1.25rem;border-radius:8px;line-height:1.6;max-height:220px;overflow-y:auto;">
+          [03:40:10] Room veritabanı aktif (Şema versiyonu v4)<br>
+          [03:40:12] WorkManager arka plan kuyruğu dinlemede (15dk periyodik döngü)<br>
+          [03:40:15] Tüm saha iş emirleri ve denetim kayıtları bulut ile senkronize.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- User / Customer Profile Switch Modal -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size:1.1rem;font-weight:700;"><i class="bi bi-people"></i> <span id="lblRoleModal">Kullanıcı &amp; Müşteri Rol Seçimi</span></h3>
+        <button style="border:none;background:none;font-size:1.2rem;cursor:pointer;" onclick="closeAuthModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;" id="lblRolePrompt">
+          Saha operasyonları panelinde işlem yapmak için aktif rol seçiniz:
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          <div class="btn btn-outline" style="justify-content:flex-start;" onclick="setRole('Saha Sorumlusu', 'Lead Field Operator')">
+            <i class="bi bi-shield-check" style="color:var(--primary);font-size:1.1rem;"></i>
+            <div><strong>Saha Sorumlusu</strong> &bull; Baş Mühendis / Vardiya Amiri</div>
+          </div>
+          <div class="btn btn-outline" style="justify-content:flex-start;" onclick="setRole('Saha Teknisyeni', 'Field Technician')">
+            <i class="bi bi-tools" style="color:#0284c7;font-size:1.1rem;"></i>
+            <div><strong>Saha Teknisyeni</strong> &bull; Mekanik &amp; Elektrik Bakım Operatörü</div>
+          </div>
+          <div class="btn btn-outline" style="justify-content:flex-start;" onclick="setRole('Müşteri', 'Customer / Client')">
+            <i class="bi bi-building" style="color:var(--accent);font-size:1.1rem;"></i>
+            <div><strong>Müşteri</strong> &bull; Tesis Sahibi / Kurumsal Firma Temsilcisi</div>
+          </div>
+          <div class="btn btn-outline" style="justify-content:flex-start;" onclick="setRole('Kullanıcı', 'System User')">
+            <i class="bi bi-person" style="color:#64748b;font-size:1.1rem;"></i>
+            <div><strong>Kullanıcı</strong> &bull; Standart Saha Personeli</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeAuthModal()" id="lblCloseModal">Kapat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exact User-Requested Footer -->
+  <footer>
+    <div>Developed by Beraat Yetkin</div>
+    <div>
+      <a href="https://github.com/kubrvk/FieldOps" target="_blank" rel="noopener noreferrer">
+        <i class="bi bi-github"></i> GitHub
+      </a>
+    </div>
+  </footer>
+
+  <div class="toast" id="toastMsg">
+    <i class="bi bi-check2-circle" style="color:#10b981;"></i>
+    <span id="toastText">İşlem başarıyla tamamlandı.</span>
+  </div>
+
+  <script>
+    let currentLang = localStorage.getItem('fieldops_lang') || 'tr';
+    let isOnline = true;
+    let pendingQueue = JSON.parse(localStorage.getItem('fo_queue')) || [];
+    let currentRole = localStorage.getItem('fo_role') || 'Saha Sorumlusu';
+
+    // Rich Dataset: 8 Realistic Industrial Work Orders
+    let workOrders = JSON.parse(localStorage.getItem('fo_orders')) || [
+      {
+        id: 'WO-8421',
+        titleTr: 'Ana Jeneratör 1,500 kVA Yıllık Revizyon',
+        titleEn: 'Main Generator 1,500 kVA Annual Overhaul',
+        locationTr: 'Sektör 4 Veri Merkezi Güç Santrali',
+        locationEn: 'Sector 4 Datacenter Power Substation',
+        equip: 'CAT-3516B (Seri No: 92841)',
+        prioTr: 'Kritik',
+        prioEn: 'Critical',
+        prioKey: 'Critical',
+        badge: 'badge-critical',
+        statusTr: 'Denetim Bekliyor',
+        statusEn: 'Pending Inspection',
+        dueTr: 'Bugün, 14:00',
+        dueEn: 'Today, 14:00'
+      },
+      {
+        id: 'WO-8422',
+        titleTr: 'Hidrolik Pres #3 Hat Sızdırmazlık Testi',
+        titleEn: 'Hydraulic Press #3 Seal Integrity Audit',
+        locationTr: 'Montaj Binası B Salonu',
+        locationEn: 'Sub-assembly Hall B',
+        equip: 'Schuler 400T (Seri No: 19283)',
+        prioTr: 'Yüksek',
+        prioEn: 'High',
+        prioKey: 'High',
+        badge: 'badge-high',
+        statusTr: 'İşlemde',
+        statusEn: 'In Progress',
+        dueTr: 'Bugün, 16:30',
+        dueEn: 'Today, 16:30'
+      },
+      {
+        id: 'WO-8423',
+        titleTr: 'Endüstriyel Chiller Soğutma Grubu Bakımı',
+        titleEn: 'Industrial Chiller Glycol Circulation Audit',
+        locationTr: 'Çatı Mekanik Tesisat Alanı',
+        locationEn: 'Roof Utility Deck A',
+        equip: 'Daikin EWAD-400 (Seri No: 48190)',
+        prioTr: 'Normal',
+        prioEn: 'Normal',
+        prioKey: 'Normal',
+        badge: 'badge-normal',
+        statusTr: 'Planlandı',
+        statusEn: 'Scheduled',
+        dueTr: 'Yarın, 09:00',
+        dueEn: 'Tomorrow, 09:00'
+      },
+      {
+        id: 'WO-8424',
+        titleTr: 'Yangın Pompa İstasyonu Basınç Kalibrasyonu',
+        titleEn: 'Fire Water Booster Station Flow Calibration',
+        locationTr: 'Tesis Su Deposu Pompa Dairesi',
+        locationEn: 'Plant Reservoir Pump House',
+        equip: 'Grundfos Hydro EN 12845',
+        prioTr: 'Kritik',
+        prioEn: 'Critical',
+        prioKey: 'Critical',
+        badge: 'badge-critical',
+        statusTr: 'Denetim Bekliyor',
+        statusEn: 'Pending Inspection',
+        dueTr: 'Yarın, 11:30',
+        dueEn: 'Tomorrow, 11:30'
+      },
+      {
+        id: 'WO-8425',
+        titleTr: '5 Eksenli CNC Freze Mil Rulman Titreşim Analizi',
+        titleEn: '5-Axis CNC Spindle Bearing Vibration Analysis',
+        locationTr: 'Hassas İşleme Fabrikası #1',
+        locationEn: 'Precision Tooling Plant #1',
+        equip: 'DMG Mori DMU 50 (Seri No: 58201)',
+        prioTr: 'Yüksek',
+        prioEn: 'High',
+        prioKey: 'High',
+        badge: 'badge-high',
+        statusTr: 'İşlemde',
+        statusEn: 'In Progress',
+        dueTr: '23 Eyl, 10:00',
+        dueEn: 'Sep 23, 10:00'
+      },
+      {
+        id: 'WO-8426',
+        titleTr: 'Vidalı Hava Kompresörü Yağ & Filtre Değişimi',
+        titleEn: 'Rotary Screw Air Compressor Overhaul',
+        locationTr: 'Pnömatik Güç Dairesi',
+        locationEn: 'Pneumatics Supply Room',
+        equip: 'Atlas Copco GA 75 VSD',
+        prioTr: 'Normal',
+        prioEn: 'Normal',
+        prioKey: 'Normal',
+        badge: 'badge-normal',
+        statusTr: 'Planlandı',
+        statusEn: 'Scheduled',
+        dueTr: '24 Eyl, 14:00',
+        dueEn: 'Sep 24, 14:00'
+      },
+      {
+        id: 'WO-8427',
+        titleTr: 'Ana Konveyör Bant Tahrik Tamburu Hizalaması',
+        titleEn: 'Bulk Handling Conveyor Belt Drum Alignment',
+        locationTr: 'Hammadde Sevk Hattı 2B',
+        locationEn: 'Raw Materials Line 2B',
+        equip: 'Siemens Flender KZA 180',
+        prioTr: 'Yüksek',
+        prioEn: 'High',
+        prioKey: 'High',
+        badge: 'badge-high',
+        statusTr: 'Planlandı',
+        statusEn: 'Scheduled',
+        dueTr: '25 Eyl, 15:00',
+        dueEn: 'Sep 25, 15:00'
+      },
+      {
+        id: 'WO-8419',
+        titleTr: '400V Dağıtım Barası Termal Kamera Taraması',
+        titleEn: '400V Main Switchgear Thermal Imaging Audit',
+        locationTr: 'Trafo Merkezi #2 Giriş Hücresi',
+        locationEn: 'Substation #2 Feed Switchgear',
+        equip: 'ABB UniGear ZS1',
+        prioTr: 'Tamamlandı',
+        prioEn: 'Completed',
+        prioKey: 'Done',
+        badge: 'badge-done',
+        statusTr: 'Onaylandı',
+        statusEn: 'Certified Done',
+        dueTr: 'Dün',
+        dueEn: 'Yesterday'
+      }
+    ];
+
+    function saveState() {
+      localStorage.setItem('fo_orders', JSON.stringify(workOrders));
+      localStorage.setItem('fo_queue', JSON.stringify(pendingQueue));
+      localStorage.setItem('fo_role', currentRole);
+      localStorage.setItem('fieldops_lang', currentLang);
+      document.getElementById('kpiQueue').textContent = pendingQueue.length;
+      document.getElementById('queueCount').textContent = currentLang === 'tr' ? `${pendingQueue.length} bekleyen işlem` : `${pendingQueue.length} pending entities`;
+    }
+
+    function showToast(text) {
+      const t = document.getElementById('toastMsg');
+      document.getElementById('toastText').textContent = text;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function switchTab(tab, btn) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).style.display = 'block';
+      if (btn) btn.classList.add('active');
+    }
+
+    function toggleNetworkMode() {
+      isOnline = !isOnline;
+      const pill = document.getElementById('networkToggle');
+      const text = document.getElementById('networkText');
+      if (isOnline) {
+        pill.className = 'network-pill';
+        text.textContent = 'Online (WorkManager Cloud Sync)';
+        showToast(currentLang === 'tr' ? 'Çevrimiçi: Bulut eşitleme devrede.' : 'Online: Cloud sync enabled.');
+      } else {
+        pill.className = 'network-pill offline';
+        text.textContent = 'Offline (Room SQLite Mode)';
+        showToast(currentLang === 'tr' ? 'Çevrimdışı: Room SQLite yerel kuyruğu devrede.' : 'Offline: Saving mutations to Room SQLite.');
+      }
+    }
+
+    function toggleLanguage() {
+      currentLang = (currentLang === 'tr') ? 'en' : 'tr';
+      applyLanguage(currentLang);
+    }
+
+    function applyLanguage(lang) {
+      document.documentElement.lang = lang;
+      document.getElementById('langTr').className = (lang === 'tr') ? 'active' : '';
+      document.getElementById('langEn').className = (lang === 'en') ? 'active' : '';
+
+      if (lang === 'tr') {
+        document.getElementById('hdrSub').textContent = 'Saha Operasyonları & Denetim Platformu';
+        document.getElementById('navTab1').innerHTML = '<i class="bi bi-list-task"></i> İş Emirleri & Saha Görevleri';
+        document.getElementById('navTab2').innerHTML = '<i class="bi bi-clipboard-check"></i> Saha Denetim & Kontrol Stüdyosu';
+        document.getElementById('navTab3').innerHTML = '<i class="bi bi-database-check"></i> SQLite Çevrimdışı Kuyruk & Senkronizasyon';
+        document.getElementById('kpiTitle1').textContent = 'Aktif Saha Görevleri';
+        document.getElementById('kpiTitle2').textContent = 'Tamamlanan Denetimler';
+        document.getElementById('kpiTitle3').textContent = 'Bekleyen SQLite Kuyruğu';
+        document.getElementById('kpiTitle4').textContent = 'GPS Doğruluk Oranı';
+        document.getElementById('secTitle1').innerHTML = '<i class="bi bi-briefcase text-primary"></i> Saha İş Emri Dağıtım Listesi';
+        document.getElementById('secDesc1').textContent = 'Müşteri talepleri ve planlı endüstriyel bakım kayıtları.';
+        document.getElementById('fltAll').textContent = 'Tümü';
+        document.getElementById('fltCrit').textContent = 'Kritik';
+        document.getElementById('fltProg').textContent = 'Devam Eden';
+        document.getElementById('btnSwitchRole').textContent = 'Rol Değiştir';
+        document.getElementById('lblJobInfo').textContent = 'Görev & Konum Bilgisi';
+        document.getElementById('lblGpsTitle').textContent = 'Canlı GPS Geotag Doğrulaması';
+        document.getElementById('btnGpsFix').textContent = 'Konum Al';
+        document.getElementById('lblPhotoEvidence').textContent = 'Saha Fotoğraf Kanıtı (GPS Damgalı)';
+        document.getElementById('btnAddPhoto').textContent = 'Fotoğraf Ekle';
+        document.getElementById('lblSignOff').textContent = 'Yetkili Dijital Onay İmzası';
+        document.getElementById('btnClearSign').textContent = 'Temizle';
+        document.getElementById('lblChecklistTitle').textContent = 'Teknik Saha Kontrol Kriterleri';
+        document.getElementById('lblStandard').textContent = 'ISO-9001 Endüstriyel Standartlar';
+        document.querySelectorAll('.lblPass').forEach(el => el.textContent = 'Uygun');
+        document.querySelectorAll('.lblFail').forEach(el => el.textContent = 'Uygunsuz');
+        document.getElementById('lblTechNotes').textContent = 'Teknik Notlar & Müşteri Açıklaması';
+        document.getElementById('btnCancel').textContent = 'Vazgeç';
+        document.getElementById('btnSaveInspect').innerHTML = '<i class="bi bi-check2-all"></i> Denetimi Tamamla & Kaydet';
+        document.getElementById('syncSecTitle').innerHTML = '<i class="bi bi-database text-primary"></i> Room SQLite Çevrimdışı Depolama & Senkronizasyon';
+        document.getElementById('syncSecDesc').textContent = 'Saha teknisyenleri şebeke çekmediğinde işlemler yerel SQLite veritabanına yazılır, internet geldiğinde WorkManager ile buluta aktarılır.';
+        document.getElementById('btnTriggerSync').innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> WorkManager Senkronizasyonunu Tetikle';
+        document.getElementById('lblDbArch').textContent = 'Yerel Veritabanı Mimarisi';
+        document.getElementById('lblPolicy').textContent = 'WorkManager Arka Plan Politikası';
+        document.getElementById('lblConsole').textContent = 'Canlı Worker Konsol Günlüğü';
+        document.getElementById('lblRoleModal').textContent = 'Kullanıcı & Müşteri Rol Seçimi';
+        document.getElementById('lblRolePrompt').textContent = 'Saha operasyonları panelinde işlem yapmak için aktif rol seçiniz:';
+        document.getElementById('lblCloseModal').textContent = 'Kapat';
+      } else {
+        document.getElementById('hdrSub').textContent = 'Enterprise Field Service & Site Operations';
+        document.getElementById('navTab1').innerHTML = '<i class="bi bi-list-task"></i> Work Orders & Dispatch';
+        document.getElementById('navTab2').innerHTML = '<i class="bi bi-clipboard-check"></i> Site Inspection & Audit Studio';
+        document.getElementById('navTab3').innerHTML = '<i class="bi bi-database-check"></i> SQLite Offline Queue & Cloud Sync';
+        document.getElementById('kpiTitle1').textContent = 'Active Field Orders';
+        document.getElementById('kpiTitle2').textContent = 'Completed Audits';
+        document.getElementById('kpiTitle3').textContent = 'Pending SQLite Queue';
+        document.getElementById('kpiTitle4').textContent = 'GPS Accuracy Ratio';
+        document.getElementById('secTitle1').innerHTML = '<i class="bi bi-briefcase text-primary"></i> Dispatched Work Orders List';
+        document.getElementById('secDesc1').textContent = 'Customer service requests and scheduled preventive maintenance records.';
+        document.getElementById('fltAll').textContent = 'All';
+        document.getElementById('fltCrit').textContent = 'Critical';
+        document.getElementById('fltProg').textContent = 'In Progress';
+        document.getElementById('btnSwitchRole').textContent = 'Switch Role';
+        document.getElementById('lblJobInfo').textContent = 'Job & Site Particulars';
+        document.getElementById('lblGpsTitle').textContent = 'Live GPS Geotag Verification';
+        document.getElementById('btnGpsFix').textContent = 'Re-Fix GPS';
+        document.getElementById('lblPhotoEvidence').textContent = 'Site Photo Evidence (GPS Watermark)';
+        document.getElementById('btnAddPhoto').textContent = 'Attach Photo';
+        document.getElementById('lblSignOff').textContent = 'Authorized Digital Sign-Off';
+        document.getElementById('btnClearSign').textContent = 'Clear';
+        document.getElementById('lblChecklistTitle').textContent = 'Technical Inspection Checklist';
+        document.getElementById('lblStandard').textContent = 'ISO-9001 Industrial Standards';
+        document.querySelectorAll('.lblPass').forEach(el => el.textContent = 'Pass');
+        document.querySelectorAll('.lblFail').forEach(el => el.textContent = 'Fail');
+        document.getElementById('lblTechNotes').textContent = 'Technical Observations & Client Notes';
+        document.getElementById('btnCancel').textContent = 'Cancel';
+        document.getElementById('btnSaveInspect').innerHTML = '<i class="bi bi-check2-all"></i> Finalize & Commit Audit';
+        document.getElementById('syncSecTitle').innerHTML = '<i class="bi bi-database text-primary"></i> Room SQLite Offline Storage & Synchronization';
+        document.getElementById('syncSecDesc').textContent = 'Offline mutations are committed locally to Room SQLite entities before dispatch via Android WorkManager.';
+        document.getElementById('btnTriggerSync').innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Trigger WorkManager Cloud Sync';
+        document.getElementById('lblDbArch').textContent = 'Local Database Architecture';
+        document.getElementById('lblPolicy').textContent = 'WorkManager Background Policy';
+        document.getElementById('lblConsole').textContent = 'Live Worker Console Stream';
+        document.getElementById('lblRoleModal').textContent = 'User & Customer Role Selection';
+        document.getElementById('lblRolePrompt').textContent = 'Select an authorized operational persona for this field session:';
+        document.getElementById('lblCloseModal').textContent = 'Close';
+      }
+
+      renderOrders();
+      saveState();
+    }
+
+    function renderOrders(filter = 'all') {
+      const container = document.getElementById('ordersContainer');
+      container.innerHTML = '';
+
+      const filtered = workOrders.filter(w => {
+        if (filter === 'all') return true;
+        if (filter === 'Critical') return w.prioKey === 'Critical';
+        if (filter === 'In Progress') return w.statusTr === 'İşlemde';
+        return true;
+      });
+
+      filtered.forEach(wo => {
+        const title = currentLang === 'tr' ? wo.titleTr : wo.titleEn;
+        const location = currentLang === 'tr' ? wo.locationTr : wo.locationEn;
+        const prio = currentLang === 'tr' ? wo.prioTr : wo.prioEn;
+        const due = currentLang === 'tr' ? wo.dueTr : wo.dueEn;
+        const btnText = currentLang === 'tr' ? 'Denetimi Aç' : 'Inspect Job';
+
+        const div = document.createElement('div');
+        div.className = 'order-card';
+        div.innerHTML = `
+          <div class="order-top">
+            <div>
+              <span class="order-id">${wo.id}</span>
+              <div class="order-title">${title}</div>
+            </div>
+            <span class="badge ${wo.badge}">${prio}</span>
+          </div>
+          <div class="order-meta">
+            <i class="bi bi-geo-alt"></i> ${location}
+          </div>
+          <div class="order-meta">
+            <i class="bi bi-cpu"></i> ${wo.equip}
+          </div>
+          <div class="order-footer">
+            <span style="font-size:0.8rem;color:var(--text-muted);"><i class="bi bi-clock"></i> ${due}</span>
+            <button class="btn btn-primary btn-sm" onclick="selectJob('${wo.id}')">
+              <i class="bi bi-clipboard-check"></i> ${btnText}
+            </button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function filterOrders(type) {
+      renderOrders(type);
+      showToast(currentLang === 'tr' ? `Filtrelendi: ${type}` : `Filtered: ${type}`);
+    }
+
+    function selectJob(id) {
+      const job = workOrders.find(j => j.id === id);
+      if (!job) return;
+
+      document.getElementById('activeJobBadge').textContent = job.id;
+      document.getElementById('activeJobTitle').textContent = currentLang === 'tr' ? job.titleTr : job.titleEn;
+      document.getElementById('activeJobSite').innerHTML = `<i class="bi bi-geo-alt"></i> ${currentLang === 'tr' ? job.locationTr : job.locationEn}`;
+      document.getElementById('activeJobEquip').innerHTML = `<i class="bi bi-cpu"></i> ${job.equip}`;
+
+      switchTab('audit', document.querySelectorAll('.tab-btn')[1]);
+      showToast(currentLang === 'tr' ? `İş Emri Yüklendi: ${id}` : `Loaded Work Order: ${id}`);
+    }
+
+    function acquireGps() {
+      const lat = (41.0082 + (Math.random() - 0.5) * 0.004).toFixed(4);
+      const lng = (28.9784 + (Math.random() - 0.5) * 0.004).toFixed(4);
+      document.getElementById('gpsCoordinates').textContent = `${lat}° N, ${lng}° E • ${currentLang === 'tr' ? 'Hassasiyet' : 'Accuracy'} ±2.1m`;
+      showToast(currentLang === 'tr' ? 'GPS Uydusu Konum Doğrulaması Güncellendi.' : 'GPS Satellite Coordinates Refreshed.');
+    }
+
+    function toggleCheck(btn, type) {
+      const parent = btn.parentElement;
+      parent.querySelectorAll('.check-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function attachPhoto() {
+      document.getElementById('photoStatus').innerHTML = '<i class="bi bi-check-circle-fill"></i> flans_sizdirmazlik_kanit_v2.jpg (3.2 MB)';
+      showToast(currentLang === 'tr' ? 'Saha fotoğrafı GPS koordinat damgasıyla eklendi.' : 'Photo attached with GPS timestamp.');
+    }
+
+    function signPadClick() {
+      const pad = document.getElementById('signPad');
+      pad.className = 'signature-pad signed';
+      pad.innerHTML = `<i class="bi bi-check2-circle"></i> ${currentRole} Onayı Doğrulandı`;
+      showToast(currentLang === 'tr' ? 'Yetkili dijital imza mühürlendi.' : 'Authorized digital sign-off verified.');
+    }
+
+    function clearSignature() {
+      const pad = document.getElementById('signPad');
+      pad.className = 'signature-pad';
+      pad.textContent = currentLang === 'tr' ? 'İmzalamak için tıklayınız...' : 'Click to draw / authorize sign-off...';
+    }
+
+    function completeInspection() {
+      const activeId = document.getElementById('activeJobBadge').textContent;
+      const job = workOrders.find(j => j.id === activeId);
+      if (job) {
+        job.statusTr = 'Tamamlandı';
+        job.statusEn = 'Certified Done';
+        job.prioTr = 'Tamamlandı';
+        job.prioEn = 'Completed';
+        job.prioKey = 'Done';
+        job.badge = 'badge-done';
+      }
+
+      pendingQueue.push({
+        type: 'INSPECTION_SUBMIT',
+        workOrderId: activeId,
+        operatorRole: currentRole,
+        timestamp: new Date().toISOString(),
+        gps: document.getElementById('gpsCoordinates').textContent
+      });
+      saveState();
+
+      if (isOnline) {
+        triggerSync();
+      } else {
+        showToast(currentLang === 'tr' ? 'Kayıt yerel Room SQLite kuyruğuna yazıldı.' : 'Saved to local Room SQLite queue.');
+      }
+
+      switchTab('orders', document.querySelectorAll('.tab-btn')[0]);
+      renderOrders();
+    }
+
+    function triggerSync() {
+      const log = document.getElementById('syncLog');
+      const time = new Date().toLocaleTimeString();
+      log.innerHTML += `<br>[${time}] WorkManager Worker görevi tetiklendi (İş Emri #${Math.floor(100+Math.random()*900)})<br>[${time}] Room SQLite yerel kuyruğundaki ${pendingQueue.length} varlık bulut API'sine iletildi.<br>[${time}] Bulut eşitleme BAŞARILI (HTTP 200 OK)`;
+      pendingQueue = [];
+      saveState();
+      showToast(currentLang === 'tr' ? 'WorkManager bulut senkronizasyonu tamamlandı!' : 'WorkManager cloud sync completed!');
+    }
+
+    function openAuthModal() { document.getElementById('authModal').classList.add('active'); }
+    function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); }
+
+    function setRole(roleName, desc) {
+      currentRole = roleName;
+      document.getElementById('techRole').textContent = roleName;
+      const pad = document.getElementById('signPad');
+      if (pad.classList.contains('signed')) {
+        pad.innerHTML = `<i class="bi bi-check2-circle"></i> ${roleName} Onayı Doğrulandı`;
+      }
+      saveState();
+      closeAuthModal();
+      showToast(currentLang === 'tr' ? `Aktif Rol: ${roleName}` : `Active Role: ${roleName}`);
+    }
+
+    // Init with TR default
+    applyLanguage(currentLang);
+    document.getElementById('techRole').textContent = currentRole;
+    saveState();
+  </script>
+</body>
+</html>
