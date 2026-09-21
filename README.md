@@ -1,13 +1,13 @@
-# FieldOps — Native Android Field Audit & Barcode Platform
+# FieldOps — Native Android Field Service & Site Inspection Platform
 
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square)
 ![Platform](https://img.shields.io/badge/Platform-Android_Native-green?style=flat-square&logo=android)
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9.22-purple?style=flat-square&logo=kotlin)
 ![Room Database](https://img.shields.io/badge/Database-Room_SQLite-orange?style=flat-square)
-![ZXing](https://img.shields.io/badge/Scanner-ZXing_Embedded-blue?style=flat-square)
+![WorkManager](https://img.shields.io/badge/Sync-WorkManager_Worker-blue?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-purple?style=flat-square)
 
-FieldOps is a native Android application architected for industrial warehouse audits, field inventory counting, and asset management in connectivity-denied environments. Built on offline-first Room SQLite storage with background WorkManager cloud synchronization.
+FieldOps is a native Android application engineered for mission-critical field operations, work order dispatch, GPS-verified site inspection checklists, and incident logging in connectivity-denied environments. Built on an offline-first Room SQLite storage architecture with background WorkManager cloud synchronization.
 
 ---
 
@@ -15,19 +15,21 @@ FieldOps is a native Android application architected for industrial warehouse au
 
 ```
   +-------------------------------+      +-------------------------------+
-  |       Camera Hardware         |      |        Location Provider      |
+  |       Sensor & Camera         |      |       Fused Location Provider |
+  |   (Evidence Photo Capture)    |      |    (GPS Coordinates & RTK)    |
   +---------------+---------------+      +---------------+---------------+
-                  | Continuous Frames                    | GPS Coordinates
+                  | EXIF Geotagging                      | Coordinates & Accuracy
                   v                                      v
   +-------------------------------+      +-------------------------------+
-  |     ZXing Barcode Decoder     |      |       GeoTagging Filter       |
+  |     Inspection Checklist      |      |      Anti-Tamper GeoFilter    |
+  |     (Pass / Fail / Values)    |      |     (Geofence Verification)   |
   +---------------+---------------+      +---------------+---------------+
                   |                                      |
                   +-------------------+------------------+
                                       |
                                       v
                        +-------------------------------+
-                       |   AuditViewModel / Repository |
+                       |   WorkOrderViewModel / Repo   |
                        +---------------+---------------+
                                        |
                                        v
@@ -36,16 +38,16 @@ FieldOps is a native Android application architected for industrial warehouse au
                        |    (Local Offline Source)     |
                        +---------------+---------------+
                                        |
-                                       | (Unsynced delta events)
+                                       | (Delta audit events)
                                        v
                        +-------------------------------+
                        |      WorkManager Worker       |
-                       |  (Backoff Retry Cloud Sync)   |
+                       |  (Backoff Exponential Sync)   |
                        +---------------+---------------+
                                        |
                                        v
                        +-------------------------------+
-                       |      Central ERP REST API     |
+                       |    Central Operations API     |
                        +-------------------------------+
 ```
 
@@ -53,10 +55,10 @@ FieldOps is a native Android application architected for industrial warehouse au
 
 ## 🚀 Architectural Capabilities
 
-- **Offline-First Resilience**: Continuous full-speed barcode and QR scanning even with zero cellular/Wi-Fi coverage.
-- **Hardware-Accelerated Decoding**: Leverages ZXing embedded pipelines to decode high-density Code 128, EAN-13, and QR symbols in sub-100ms.
-- **GPS Audit Trail**: Every scanned record is tagged with precise geographic coordinates for anti-tamper inspection audits.
-- **WorkManager Battery-Aware Sync**: Automatically defers cloud upload batches until active network connectivity is established.
+- **Offline-First Persistence**: Field technicians execute inspections, record sensor telemetry, and capture photo evidence even with zero cellular or Wi-Fi coverage.
+- **GPS-Verified Geofencing**: Every work order and checklist item is cryptographically tagged with precise geographic coordinates and timestamp for anti-tamper compliance.
+- **Background WorkManager Sync**: Automatically defers cloud upload batches until active network connectivity is established, with exponential backoff retry.
+- **Jetpack Architecture Components**: Clean MVVM structure utilizing Kotlin Coroutines, StateFlow, Room ORM, and Material 3 design patterns.
 
 ---
 
@@ -72,7 +74,13 @@ cd FieldOps
 
 ---
 
+## 🌐 Live Web Demo
+
+Interactive web demonstrator available at: [https://fieldopsapp.web.app](https://fieldopsapp.web.app)
+
+---
+
 ## 👤 Author & License
 
-- **Author**: `kubrvk` ([GitHub Profile](https://github.com/kubrvk))
+- **Author**: `kubrvk` (Beraat Yetkin) ([GitHub Profile](https://github.com/kubrvk))
 - **License**: MIT License.
